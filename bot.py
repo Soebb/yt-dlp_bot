@@ -54,6 +54,8 @@ async def download_video(client, callback : CallbackQuery):
 
     ydl_opts = {
             "format": f"best[height<={quality}]",
+            'geo_bypass':True,
+            'nocheckcertificate':True,
             "progress_hooks": [lambda d: download_progress_hook(d, callback.message, client)]
         }
 
