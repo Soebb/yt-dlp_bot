@@ -1,15 +1,8 @@
-import asyncio
-import os
-
+import asyncio, os
 import yt_dlp
 from pyrogram import Client, filters
-from pyrogram.errors.exceptions import UserNotParticipant
-from pyrogram.types import (CallbackQuery, InlineKeyboardButton,
-                            InlineKeyboardMarkup, InlineQuery,
-                            InlineQueryResultArticle, InputTextMessageContent,
-                            Message)
+from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 from yt_dlp.utils import DownloadError
-
 from config import Config
 from helpers import download_progress_hook
 
@@ -48,10 +41,10 @@ async def start(client, message : Message):
 @app.on_message(link_filter)
 async def options(client, message : Message):
     print(message.text)
-    await message.reply("What would like to do?", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Download", f"d_{message.text}")]]))
+    await message.reply("What would like to do?", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("240p", f"240 {message.text}")], [InlineKeyboardButton("480p", f"480 {message.text}")], [InlineKeyboardButton("720p", f"720 {message.text}")], [InlineKeyboardButton("1080p", f"1080 {message.text}")]]))
 
 
-@app.on_callback_query(filters.regex("^d"))
+@app.on_callback_query()
 async def download_video(client, callback : CallbackQuery):
     url = callback.data.split("_",1)[1]
     msg = await callback.message.edit("Downloading...")
