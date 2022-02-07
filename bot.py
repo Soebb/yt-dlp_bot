@@ -34,12 +34,12 @@ link_filter = filters.create(link_fil, name="link_filter")
 
 @app.on_message(filters.command("start"))
 async def start(client, message : Message):
-    await message.reply("hi")
+    await message.reply("Hi, I am yt-dlp bot.\nI can download videos from many sites.\n\nSend a video URL to get started.")
 
 @app.on_message(link_filter)
 async def options(client, message : Message):
     print(message.text)
-    await message.reply("What would like to do?", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("240p", f"240 {message.text}")], [InlineKeyboardButton("480p", f"480 {message.text}")], [InlineKeyboardButton("720p", f"720 {message.text}")], [InlineKeyboardButton("1080p", f"1080 {message.text}")]]))
+    await message.reply("Which quality you want?", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("240p", f"240 {message.text}")], [InlineKeyboardButton("480p", f"480 {message.text}")], [InlineKeyboardButton("720p", f"720 {message.text}")], [InlineKeyboardButton("1080p", f"1080 {message.text}")]]))
 
 @app.on_callback_query()
 async def download_video(client, callback : CallbackQuery):
