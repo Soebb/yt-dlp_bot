@@ -19,11 +19,9 @@ else:
 active_list = []
 queue = []
 
-
 async def run_async(func, *args, **kwargs):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, func, *args, **kwargs)
-
 
 def link_fil(filter, client, update):
     if "http" in update.text:
@@ -43,10 +41,10 @@ async def options(client, message : Message):
     print(message.text)
     await message.reply("What would like to do?", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("240p", f"240 {message.text}")], [InlineKeyboardButton("480p", f"480 {message.text}")], [InlineKeyboardButton("720p", f"720 {message.text}")], [InlineKeyboardButton("1080p", f"1080 {message.text}")]]))
 
-
 @app.on_callback_query()
 async def download_video(client, callback : CallbackQuery):
-    url = callback.data.split("_",1)[1]
+    url = callback.data.split(" ",1)[1]
+    quality = callback.data.split()[0]
     msg = await callback.message.edit("Downloading...")
     user_id = callback.message.from_user.id
 
@@ -57,7 +55,7 @@ async def download_video(client, callback : CallbackQuery):
         active_list.append(user_id)
 
     ydl_opts = {
-            "
+            "format": f"best[height<={quality}]",
             "progress_hooks": [lambda d: download_progress_hook(d, callback.message, client)]
         }
 
@@ -67,7 +65,6 @@ async def download_video(client, callback : CallbackQuery):
         except DownloadError:
             await callback.message.edit("Sorry, There was a problem with that particular video")
             return
-
 
     for file in os.listdir('.'):
         if file.endswith(".mp4"):
