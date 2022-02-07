@@ -1,8 +1,8 @@
 import asyncio, os
-import yt_dlp
+from yt_dlp import YoutubeDL
+from yt_dlp.utils import DownloadError
 from pyrogram import Client, filters
 from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
-from yt_dlp.utils import DownloadError
 from config import Config
 from helpers import download_progress_hook
 
@@ -23,23 +23,21 @@ async def run_async(func, *args, **kwargs):
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, func, *args, **kwargs)
 
-def link_fil(filter, client, update):
-    if "http" in update.text:
-        return True
-    else:
-        return False
-
-link_filter = filters.create(link_fil, name="link_filter")
-
+def is_ytdl_supported(input_url: str) -> bool:
+    shei = YoutubeDL.extractor.gen_extractors()
+    return any(int_extraactor.suitable(input_url) and int_extraactor.IE_NAME != "generic" for int_extraactor in shei)
 
 @app.on_message(filters.command("start"))
 async def start(client, message : Message):
     await message.reply("Hi, I am yt-dlp bot.\nI can download videos from many sites.\n\nSend a video URL to get started.")
 
-@app.on_message(link_filter)
+@app.on_message(filters.text)
 async def options(client, message : Message):
-    print(message.text)
-    await message.reply("Which quality you want?", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("240p", f"240 {message.text}")], [InlineKeyboardButton("480p", f"480 {message.text}")], [InlineKeyboardButton("720p", f"720 {message.text}")], [InlineKeyboardButton("1080p", f"1080 {message.text}")]]))
+    match = is_ytdl_supported(message.text)
+    if match:
+        await message.reply("Which quality you want?", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("240p", f"240 {message.text}")], [InlineKeyboardButton("480p", f"480 {message.text}")], [InlineKeyboardButton("720p", f"720 {message.text}")], [InlineKeyboardButton("1080p", f"1080 {message.text}")]]))
+    else:
+        await message.reply("Sorry, Not supported!")
 
 @app.on_callback_query()
 async def download_video(client, callback : CallbackQuery):
@@ -59,7 +57,7 @@ async def download_video(client, callback : CallbackQuery):
             "progress_hooks": [lambda d: download_progress_hook(d, callback.message, client)]
         }
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    with YoutubeDL(ydl_opts) as ydl:
         try:
             await run_async(ydl.download, [url])
         except DownloadError:
